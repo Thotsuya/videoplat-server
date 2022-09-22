@@ -4,10 +4,7 @@ import Video from "../models/Video";
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   // Find user and return user with its videos
-  const user = await User.findOne({
-    where: {
-      id: req.params.id,
-    },
+  const user = await User.findByPk(req.params.id, {
     attributes: {
       exclude: ["password", "role", "createdAt", "updatedAt"],
     },
