@@ -1,5 +1,6 @@
 import * as Sequelize from "sequelize";
 import sequelize from "../database";
+import Video from "./Video";
 
 export interface UserAttributes {
   id?: number;
@@ -7,6 +8,7 @@ export interface UserAttributes {
   email: string;
   password: string;
   role: string;
+  profileImage?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -17,6 +19,7 @@ export interface UserModel extends Sequelize.Model<UserAttributes> {
   email: string;
   password: string;
   role: string;
+  profileImage?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -42,6 +45,12 @@ const User = sequelize.define<UserModel, UserAttributes>("User", {
   role: {
     type: Sequelize.STRING,
   },
+  profileImage: {
+    type: Sequelize.STRING,
+  },
 });
+
+User.hasMany(Video, { foreignKey: "user_id", sourceKey: "id" });
+Video.belongsTo(User, { foreignKey: "user_id", targetKey: "id" });
 
 export default User;

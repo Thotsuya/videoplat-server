@@ -3,11 +3,14 @@ import sequelize from "./database";
 import { config } from "dotenv";
 import cors from "cors";
 import * as bodyParser from "body-parser";
+import { verifyToken } from "./middlewares/VerifyToken";
 
+import "./models/Video";
 import "./models/User";
 
-import userRouter from "./routes/user";
 import authRouter from "./routes/auth";
+import videoRouter from "./routes/videos";
+import creatorRouter from "./routes/creators";
 
 config();
 
@@ -19,16 +22,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
-app.use("/users", userRouter);
 app.use("/", authRouter);
 
-sequelize
-  .sync({
-    alter: true,
-  })
-  .then(() => {
-    console.log("Database connected");
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
+app.use(verifyToken);
+app.use("/videos", videoRouter);
+app.use("/creators", creatorRouter);
+
+sequelize.sync().then(() => {
+  console.log("Database connected");
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
   });
+});

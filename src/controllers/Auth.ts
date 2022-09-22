@@ -14,6 +14,7 @@ export const register = async (
     password: "required|min:6",
     password_confirmation: "required|same:password",
     role: "required",
+    profileImage: "required",
   });
 
   if (validation.fails()) {
