@@ -53,4 +53,16 @@ const User = sequelize.define<UserModel, UserAttributes>("User", {
 User.hasMany(Video, { foreignKey: "user_id", sourceKey: "id" });
 Video.belongsTo(User, { foreignKey: "user_id", targetKey: "id" });
 
+User.belongsToMany(Video, {
+  through: "User_Likes",
+  foreignKey: "user_id",
+  otherKey: "video_id",
+});
+
+Video.belongsToMany(User, {
+  through: "User_Likes",
+  foreignKey: "video_id",
+  otherKey: "user_id",
+});
+
 export default User;
