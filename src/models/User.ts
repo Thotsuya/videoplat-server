@@ -1,8 +1,9 @@
 import * as Sequelize from "sequelize";
-import sequelize from "database";
+import sequelize from "../database";
 
 export interface UserAttributes {
   id?: number;
+  name: string;
   email: string;
   password: string;
   role: string;
@@ -12,6 +13,7 @@ export interface UserAttributes {
 
 export interface UserModel extends Sequelize.Model<UserAttributes> {
   id?: number;
+  name: string;
   email: string;
   password: string;
   role: string;
@@ -19,11 +21,14 @@ export interface UserModel extends Sequelize.Model<UserAttributes> {
   updatedAt?: Date;
 }
 
-export const User = sequelize.define<UserModel, UserAttributes>("User", {
+const User = sequelize.define<UserModel, UserAttributes>("User", {
   id: {
     type: Sequelize.INTEGER,
     autoIncrement: true,
     primaryKey: true,
+  },
+  name: {
+    type: Sequelize.STRING,
   },
   email: {
     type: Sequelize.STRING,
@@ -38,3 +43,5 @@ export const User = sequelize.define<UserModel, UserAttributes>("User", {
     type: Sequelize.STRING,
   },
 });
+
+export default User;
