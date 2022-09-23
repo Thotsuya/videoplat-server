@@ -41,6 +41,25 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   return res.status(201).json(video);
 };
 
+export const show = async (req: Request, res: Response): Promise<Response> => {
+  const video: VideoModel | null = await Video.findByPk(req.params.id, {
+    include: [
+      {
+        model: User,
+        attributes: {
+          exclude: ["password", "role", "createdAt", "updatedAt"],
+        },
+      },
+    ],
+  });
+
+  if (!video) {
+    return res.status(404).json({ message: "Video not found" });
+  }
+
+  return res.status(200).json(video);
+};
+
 export const update = async (
   req: Request,
   res: Response
