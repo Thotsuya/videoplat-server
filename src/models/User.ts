@@ -1,6 +1,6 @@
 import * as Sequelize from "sequelize";
 import sequelize from "../database";
-import Video from "./Video";
+import Video, { VideoAttributes, VideoModel } from "./Video";
 
 export interface UserAttributes {
   id?: number;
@@ -8,6 +8,9 @@ export interface UserAttributes {
   email: string;
   password: string;
   role: string;
+  videos?: VideoAttributes[];
+  likedVideos?: VideoAttributes[];
+  followers?: UserAttributes[];
   profileImage?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -20,6 +23,9 @@ export interface UserModel extends Sequelize.Model<UserAttributes> {
   password: string;
   role: string;
   profileImage?: string;
+  followers?: UserAttributes[];
+  videos?: VideoModel[];
+  likedVideos?: VideoModel[];
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -53,16 +59,44 @@ const User = sequelize.define<UserModel, UserAttributes>("User", {
 User.hasMany(Video, { foreignKey: "user_id", sourceKey: "id" });
 Video.belongsTo(User, { foreignKey: "user_id", targetKey: "id" });
 
+export const LikedVideos = sequelize.define("LikedVideos", {
+  user_id: {
+    type: Sequelize.INTEGER,
+  },
+  video_id: {
+    type: Sequelize.INTEGER,
+  },
+});
+
+export const Followers = sequelize.define("Followers", {
+  user_id: {
+    type: Sequelize.INTEGER,
+  },
+  follower_id: {
+    type: Sequelize.INTEGER,
+  },
+});
+
 User.belongsToMany(Video, {
-  through: "User_Likes",
+  through: LikedVideos,
+  as: "likedVideos",
   foreignKey: "user_id",
   otherKey: "video_id",
 });
 
 Video.belongsToMany(User, {
-  through: "User_Likes",
+  through: LikedVideos,
+  as: "likedVideos",
   foreignKey: "video_id",
   otherKey: "user_id",
+});
+
+// Follow Unfollow
+User.belongsToMany(User, {
+  through: Followers,
+  as: "followers",
+  foreignKey: "user_id",
+  otherKey: "follower_id",
 });
 
 export default User;

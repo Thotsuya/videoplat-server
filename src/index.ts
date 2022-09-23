@@ -28,13 +28,9 @@ app.use(verifyToken);
 app.use("/videos", videoRouter);
 app.use("/creators", creatorRouter);
 
-sequelize
-  .sync({
-    force: true,
-  })
-  .then(() => {
-    console.log("Database connected");
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
+sequelize.sync().then(() => {
+  console.log("Database connected");
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
   });
+});

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import validator from "validatorjs";
 import Video, { VideoModel } from "../models/Video";
-import User from "../models/User";
+import User, { LikedVideos, UserModel } from "../models/User";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const videos: VideoModel[] = await Video.findAll({
@@ -74,4 +74,48 @@ export const update = async (
   await video.save();
 
   return res.status(200).json(video);
+};
+
+export const likeVideo = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const video: VideoModel | null = await Video.findByPk(req.params.id);
+
+  if (!video) {
+    return res.status(404).json({ message: "Video not found" });
+  }
+
+  const user: UserModel | null = await User.findByPk(req.body.user.id, {
+    include: [
+      {
+        model: Video,
+        as: "likedVideos",
+      },
+    ],
+  });
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const likedVideo = user.likedVideos?.find(
+    (video) => video.id === parseInt(req.params.id)
+  );
+
+  if (likedVideo) {
+    await LikedVideos.destroy({
+      where: {
+        user_id: req.body.user.id,
+        video_id: req.params.id,
+      },
+    });
+    return res.status(200).json({ message: "Video unliked" });
+  } else {
+    await LikedVideos.create({
+      user_id: req.body.user.id,
+      video_id: req.params.id,
+    });
+    return res.status(200).json({ message: "Video liked" });
+  }
 };
