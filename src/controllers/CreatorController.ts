@@ -2,6 +2,37 @@ import { Request, Response } from "express";
 import User, { Followers, UserAttributes } from "../models/User";
 import Video from "../models/Video";
 
+export const index = async (req: Request, res: Response): Promise<Response> => {
+  const users: UserAttributes[] = await User.findAll({
+    attributes: {
+      exclude: ["password", "role", "createdAt", "updatedAt"],
+    },
+    include: [
+      {
+        model: User,
+        as: "followers",
+        attributes: {
+          exclude: ["password", "role", "createdAt", "updatedAt"],
+        },
+      },
+      {
+        model: Video,
+        attributes: {
+          exclude: ["createdAt", "updatedAt"],
+        },
+      },
+      {
+        model: Video,
+        as: "likedVideos",
+        attributes: {
+          exclude: ["user_id", "createdAt", "updatedAt"],
+        },
+      },
+    ],
+  });
+  return res.status(200).json(users);
+};
+
 export const show = async (req: Request, res: Response): Promise<Response> => {
   // Find user and return user with its videos
   try {

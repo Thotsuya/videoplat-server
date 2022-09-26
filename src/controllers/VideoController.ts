@@ -5,9 +5,19 @@ import User, { LikedVideos, UserModel } from "../models/User";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const videos: VideoModel[] = await Video.findAll({
+    where: {
+      published: true,
+    },
     include: [
       {
         model: User,
+        attributes: {
+          exclude: ["password", "role", "createdAt", "updatedAt"],
+        },
+      },
+      {
+        model: User,
+        as: "likedBy",
         attributes: {
           exclude: ["password", "role", "createdAt", "updatedAt"],
         },
@@ -21,12 +31,12 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const validation = new validator(req.body, {
     title: "required",
     description: "required",
-    url: "required",
+    url: "required|url",
     published: "required|boolean",
   });
 
   if (validation.fails()) {
-    return res.status(400).send(validation.errors);
+    return res.status(422).send(validation.errors);
   }
 
   // Create a new video for the authenticated user

@@ -1,8 +1,9 @@
 import express, { Request, Response } from "express";
-import { show, follow } from "../controllers/CreatorController";
+import { index, show, follow } from "../controllers/CreatorController";
 
 const router = express.Router();
 
+router.get("/", index);
 router.get("/:id", show);
 router.post("/:id/follow", follow);
 

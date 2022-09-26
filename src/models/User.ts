@@ -86,7 +86,7 @@ User.belongsToMany(Video, {
 
 Video.belongsToMany(User, {
   through: LikedVideos,
-  as: "likedVideos",
+  as: "likedBy",
   foreignKey: "video_id",
   otherKey: "user_id",
 });

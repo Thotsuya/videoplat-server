@@ -13,12 +13,12 @@ export const register = async (
     email: "required|email",
     password: "required|min:6",
     password_confirmation: "required|same:password",
-    role: "required",
-    profileImage: "required",
+    role: "required|in:student,teacher",
+    profileImage: "required|url",
   });
 
   if (validation.fails()) {
-    return res.status(400).send(validation.errors);
+    return res.status(422).send(validation.errors);
   }
 
   const user: UserAttributes | null = await User.findOne({
@@ -32,13 +32,33 @@ export const register = async (
   }
 
   const hashedPassword = await bcrypt.hash(req.body.password, 12);
+
   const newUser: UserModel = await User.create({
     name: req.body.name,
     email: req.body.email,
     password: hashedPassword,
     role: req.body.role,
   });
-  return res.status(201).json(newUser);
+
+  const token: string = jwt.sign(
+    {
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+    },
+    process.env.TOKEN_SECRET as string,
+    {
+      expiresIn: req.body.remember ? "7d" : "1d",
+    }
+  );
+
+  return res.status(201).json({
+    id: newUser.id,
+    name: newUser.name,
+    email: newUser.email,
+    role: newUser.role,
+    token,
+  });
 };
 
 export const login = async (req: Request, res: Response): Promise<Response> => {
@@ -49,7 +69,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
   });
 
   if (validation.fails()) {
-    return res.status(400).send(validation.errors);
+    return res.status(422).send(validation.errors);
   }
 
   const user: UserAttributes | null = await User.findOne({
@@ -65,7 +85,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
   const validPassword = await bcrypt.compare(req.body.password, user.password);
 
   if (!validPassword) {
-    return res.status(400).send("Invalid password");
+    return res.status(400).send("Invalid credentials");
   }
 
   const token: string = jwt.sign(
